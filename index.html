@@ -29,134 +29,89 @@
       z-index: 100;
     }
 
-    .glitch {
-      text-shadow: 2px 2px #ff00ff;
-      animation: pulse 1.2s infinite;
-    }
-
-    @keyframes pulse {
-      0% { opacity: 1; }
-      50% { opacity: 0.75; }
-      100% { opacity: 1; }
+    #score {
+      color: #00ff99;
+      font-size: 18px;
     }
 
     button {
-      margin: 6px;
+      margin-top: 8px;
       padding: 8px 14px;
       border-radius: 8px;
       border: none;
       cursor: pointer;
       font-weight: bold;
+      background: #ff00ff;
+      color: white;
     }
   </style>
 </head>
 
 <body>
 
-<!-- UI Overlay -->
+<!-- UI -->
 <div id="ui-overlay">
-  <p class="glitch" id="dialogue-text">
-    Are you sure you want to know about me?
-  </p>
-  <button onclick="changeMood('creative')" style="background:#00ffff;">Yes 😄</button>
-  <button onclick="changeMood('curious')" style="background:#ff00ff; color:white;">Tell me more 👁️</button>
+  <p id="dialogue-text">Catch the glowing orb to know more about me 👀</p>
+  <p id="score">Score: 0</p>
+  <button onclick="resetGame()">Reset Game</button>
 </div>
 
 <a-scene
   mindar-image="imageTargetSrc: ./targets.mind;"
-  color-space="sRGB"
-  renderer="colorManagement: true, physicallyCorrectLights"
   vr-mode-ui="enabled: false"
   device-orientation-permission-ui="enabled: false"
 >
 
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-  <!-- ================= FRONT SIDE AR ================= -->
+  <!-- FRONT SIDE -->
   <a-entity mindar-image-target="targetIndex: 1">
+    <a-text value="Flip the card to play 🎮"
+            align="center"
+            color="#ff00ff"
+            position="0 0 0.2">
+    </a-text>
+  </a-entity>
 
-    <!-- Glow -->
-    <a-plane
-      width="1.2"
-      height="0.7"
-      material="color:#00ffff; transparent:true; opacity:0.25"
-      animation="property: material.opacity; from:0.15; to:0.4; dir:alternate; dur:1200; loop:true">
-    </a-plane>
+  <!-- BACK SIDE (GAME ZONE) -->
+  <a-entity id="card-target" mindar-image-target="targetIndex: 0">
+
+    <!-- Game Orb -->
+    <a-sphere
+      id="game-orb"
+      radius="0.1"
+      color="#00ffff"
+      position="0 0.3 0.3"
+      animation="property: position;
+                 to: 0.4 0.5 0.3;
+                 dir: alternate;
+                 dur: 1500;
+                 loop: true"
+      class="clickable">
+    </a-sphere>
 
     <!-- Name -->
     <a-text
       value="AYUSHI PADHY"
       align="center"
       color="#ffffff"
-      position="0 0.25 0.1"
+      position="0 -0.3 0.2"
       scale="0.6 0.6 0.6">
     </a-text>
 
-    <!-- Role -->
-    <a-text
-      value="Engineering Student | AR & VR"
-      align="center"
-      color="#00ffff"
-      position="0 0.1 0.1"
-      scale="0.45 0.45 0.45">
-    </a-text>
-
-    <!-- Hint -->
-    <a-text
-      value="Flip the card 👀"
-      align="center"
-      color="#ff00ff"
-      position="0 -0.2 0.1"
-      scale="0.35 0.35 0.35"
-      animation="property: opacity; from:0.3; to:1; dir:alternate; dur:1000; loop:true">
-    </a-text>
-
   </a-entity>
-
-  <!-- ================= BACK SIDE AR ================= -->
-  <a-entity id="card-target" mindar-image-target="targetIndex: 0">
-
-    <!-- Glow -->
-    <a-plane
-      width="1.2"
-      height="0.7"
-      material="color:#00ffff; transparent:true; opacity:0.2"
-      animation="property: material.opacity; from:0.1; to:0.35; dir:alternate; dur:1200; loop:true">
-    </a-plane>
-
-    <!-- Avatar -->
-    <a-entity
-      id="avatar"
-      position="0 0.35 0.15"
-      scale="0.25 0.25 0.25"
-      animation="property: position; y:0.4; dir:alternate; dur:2000; loop:true">
-
-      <a-sphere radius="0.25" color="#ffffff"></a-sphere>
-      <a-sphere radius="0.05" color="black" position="-0.08 0.05 0.22"></a-sphere>
-      <a-sphere radius="0.05" color="black" position="0.08 0.05 0.22"></a-sphere>
-
-    </a-entity>
-
-    <!-- Mood Orb -->
-    <a-octahedron
-      id="mood-orb"
-      position="0.5 0.25 0.15"
-      radius="0.1"
-      color="#ff00ff"
-      animation="property: rotation; to:0 360 0; loop:true; dur:3500">
-    </a-octahedron>
-
-  </a-entity>
-
 </a-scene>
 
 <script>
+  let score = 0;
+
   const target = document.querySelector('#card-target');
   const ui = document.querySelector('#ui-overlay');
+  const orb = document.querySelector('#game-orb');
+  const scoreText = document.querySelector('#score');
   const dialogue = document.querySelector('#dialogue-text');
-  const avatar = document.querySelector('#avatar');
-  const orb = document.querySelector('#mood-orb');
 
+  // Show UI when back side detected
   target.addEventListener("targetFound", () => {
     ui.style.display = "block";
   });
@@ -165,22 +120,26 @@
     ui.style.display = "none";
   });
 
-  function changeMood(mode) {
-    if (mode === 'creative') {
-      dialogue.innerText =
-        "I mix creativity with technology and turn ideas into experiences 🎨✨";
-      avatar.setAttribute('scale', '0.28 0.28 0.28');
-      orb.setAttribute('color', '#00ff99');
-    } else {
-      dialogue.innerText =
-        "I observe details, ask questions, and explore reality through AR 👁️";
-      avatar.setAttribute('scale', '0.22 0.22 0.22');
-      orb.setAttribute('color', '#ff4444');
-    }
+  // Game interaction
+  orb.addEventListener("click", () => {
+    score++;
+    scoreText.innerText = "Score: " + score;
+
+    orb.setAttribute("color", score % 2 === 0 ? "#ff00ff" : "#00ff99");
+
+    dialogue.innerText =
+      score < 3
+        ? "Nice! Keep going 😄"
+        : "You unlocked my creative side 🎨✨";
+  });
+
+  function resetGame() {
+    score = 0;
+    scoreText.innerText = "Score: 0";
+    dialogue.innerText = "Catch the glowing orb to know more about me 👀";
+    orb.setAttribute("color", "#00ffff");
   }
 </script>
 
 </body>
 </html>
-
-
