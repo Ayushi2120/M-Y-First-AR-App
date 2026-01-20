@@ -17,7 +17,7 @@
       width: 90%;
       background: rgba(0,0,0,0.85);
       color: #00ffff;
-      padding: 15px;
+      padding: 12px;
       border-radius: 12px;
       font-family: monospace;
       text-align: center;
@@ -29,9 +29,8 @@
 
 <body>
 
-<!-- UI -->
 <div id="ui">
-  <p id="text">Tap any circle to explore my world ✨</p>
+  <p id="info">Tap any circle to see it come alive ✨</p>
 </div>
 
 <a-scene
@@ -44,37 +43,34 @@
   <!-- FRONT SIDE TARGET -->
   <a-entity id="card" mindar-image-target="targetIndex: 0">
 
-    <!-- Glow -->
-    <a-plane width="1.2" height="0.7"
-      material="color:#00ffff; transparent:true; opacity:0.2"
-      animation="property:opacity; from:0.1; to:0.35; dir:alternate; dur:1200; loop:true">
-    </a-plane>
+    <!-- NOTE:
+         These positions MATCH printed circles approximately.
+         You can fine-tune x/y slightly if needed.
+    -->
 
-    <!-- 5 PORTALS -->
+    <!-- 🎨 Creative -->
+    <a-circle class="circle" position="-0.4 0.25 0.01" radius="0.12" color="#ff69b4"></a-circle>
 
-    <!-- Creative -->
-    <a-circle class="portal" position="-0.4 0.2 0.2" radius="0.12" color="#ff69b4"></a-circle>
+    <!-- 🍜 Foodie -->
+    <a-circle class="circle" position="0 0.32 0.01" radius="0.12" color="#ffa500"></a-circle>
 
-    <!-- Foodie -->
-    <a-circle class="portal" position="0 0.25 0.2" radius="0.12" color="#ffa500"></a-circle>
+    <!-- 👀 Observant -->
+    <a-circle class="circle" position="0.4 0.25 0.01" radius="0.12" color="#00ff99"></a-circle>
 
-    <!-- Observant -->
-    <a-circle class="portal" position="0.4 0.2 0.2" radius="0.12" color="#00ff99"></a-circle>
+    <!-- 📸 Moment -->
+    <a-circle class="circle" position="-0.22 -0.18 0.01" radius="0.12" color="#87cefa"></a-circle>
 
-    <!-- Moment Capturer -->
-    <a-circle class="portal" position="-0.2 -0.2 0.2" radius="0.12" color="#87cefa"></a-circle>
-
-    <!-- Curious -->
-    <a-circle class="portal" position="0.2 -0.2 0.2" radius="0.12" color="#9370db"></a-circle>
+    <!-- 🧠 Curious -->
+    <a-circle class="circle" position="0.22 -0.18 0.01" radius="0.12" color="#9370db"></a-circle>
 
   </a-entity>
 </a-scene>
 
 <script>
   const ui = document.getElementById("ui");
-  const text = document.getElementById("text");
-  const portals = document.querySelectorAll(".portal");
+  const info = document.getElementById("info");
   const card = document.getElementById("card");
+  const circles = document.querySelectorAll(".circle");
 
   card.addEventListener("targetFound", () => {
     ui.style.display = "block";
@@ -84,29 +80,38 @@
     ui.style.display = "none";
   });
 
-  portals[0].addEventListener("click", () => {
-    text.innerText = "🎨 Creative Mode: I turn ideas into visuals.";
-    portals[0].setAttribute("animation", "property:scale; to:1.3 1.3 1; dur:300");
-  });
+  const messages = [
+    "🎨 Creative: I love turning ideas into visuals.",
+    "🍜 Foodie: Food fuels my imagination.",
+    "👀 Observant: I notice what others miss.",
+    "📸 Moment Capturer: I freeze memories in time.",
+    "🧠 Curious: Exploring AR & VR realities."
+  ];
 
-  portals[1].addEventListener("click", () => {
-    text.innerText = "🍜 Foodie Mode: Food fuels my creativity.";
-    portals[1].setAttribute("animation", "property:rotation; to:0 0 360; dur:800");
-  });
+  circles.forEach((circle, index) => {
+    circle.addEventListener("click", () => {
 
-  portals[2].addEventListener("click", () => {
-    text.innerText = "👀 Observant Mode: I notice details others miss.";
-    portals[2].setAttribute("animation", "property:opacity; from:1; to:0.3; dir:alternate; dur:400; loop:3");
-  });
+      // bring clicked circle UP
+      circle.setAttribute("animation", `
+        property: position;
+        to: ${circle.object3D.position.x} ${circle.object3D.position.y} 0.25;
+        dur: 500;
+        easing: easeOutElastic
+      `);
 
-  portals[3].addEventListener("click", () => {
-    text.innerText = "📸 Moment Capturer: I love freezing memories.";
-    portals[3].setAttribute("animation", "property:position; y:-0.1; dir:alternate; dur:500; loop:2");
-  });
+      // show message
+      info.innerText = messages[index];
 
-  portals[4].addEventListener("click", () => {
-    text.innerText = "🧠 Curious Mind: Exploring AR & VR realities.";
-    portals[4].setAttribute("animation", "property:scale; to:0.8 0.8 1; dir:alternate; dur:400; loop:4");
+      // after 1.2s, send it back down
+      setTimeout(() => {
+        circle.setAttribute("animation", `
+          property: position;
+          to: ${circle.object3D.position.x} ${circle.object3D.position.y} 0.01;
+          dur: 400;
+          easing: easeInOutQuad
+        `);
+      }, 1200);
+    });
   });
 </script>
 
