@@ -30,7 +30,7 @@
 <body>
 
 <div id="ui">
-  <p id="info">Tap any circle to see it come alive ✨</p>
+  <p id="info">Tap a circle to bring its avatar to life ✨</p>
 </div>
 
 <a-scene
@@ -38,30 +38,43 @@
   vr-mode-ui="enabled:false"
   device-orientation-permission-ui="enabled:false">
 
+  <a-assets>
+    <img id="img-creative" src="creative.png">
+    <img id="img-foodie" src="foodie.png">
+    <img id="img-observant" src="observant.png">
+    <img id="img-camera" src="camera.png">
+    <img id="img-curious" src="curious.png">
+  </a-assets>
+
   <a-camera position="0 0 0" look-controls="enabled:false"></a-camera>
 
   <!-- FRONT SIDE TARGET -->
   <a-entity id="card" mindar-image-target="targetIndex: 0">
 
-    <!-- NOTE:
-         These positions MATCH printed circles approximately.
-         You can fine-tune x/y slightly if needed.
-    -->
+    <!-- PRINTED CIRCLES (TAP AREA) -->
 
-    <!-- 🎨 Creative -->
-    <a-circle class="circle" position="-0.4 0.25 0.01" radius="0.12" color="#ff69b4"></a-circle>
+    <a-circle class="tap-circle" data-avatar="creative"
+      position="-0.4 0.25 0.01" radius="0.12" color="#ffffff" opacity="0.01"></a-circle>
 
-    <!-- 🍜 Foodie -->
-    <a-circle class="circle" position="0 0.32 0.01" radius="0.12" color="#ffa500"></a-circle>
+    <a-circle class="tap-circle" data-avatar="foodie"
+      position="0 0.32 0.01" radius="0.12" color="#ffffff" opacity="0.01"></a-circle>
 
-    <!-- 👀 Observant -->
-    <a-circle class="circle" position="0.4 0.25 0.01" radius="0.12" color="#00ff99"></a-circle>
+    <a-circle class="tap-circle" data-avatar="observant"
+      position="0.4 0.25 0.01" radius="0.12" color="#ffffff" opacity="0.01"></a-circle>
 
-    <!-- 📸 Moment -->
-    <a-circle class="circle" position="-0.22 -0.18 0.01" radius="0.12" color="#87cefa"></a-circle>
+    <a-circle class="tap-circle" data-avatar="camera"
+      position="-0.22 -0.18 0.01" radius="0.12" color="#ffffff" opacity="0.01"></a-circle>
 
-    <!-- 🧠 Curious -->
-    <a-circle class="circle" position="0.22 -0.18 0.01" radius="0.12" color="#9370db"></a-circle>
+    <a-circle class="tap-circle" data-avatar="curious"
+      position="0.22 -0.18 0.01" radius="0.12" color="#ffffff" opacity="0.01"></a-circle>
+
+    <!-- AVATAR IMAGE (HIDDEN INITIALLY) -->
+    <a-plane id="avatar"
+      position="0 0 0.25"
+      width="0.35" height="0.35"
+      material="transparent:true"
+      visible="false">
+    </a-plane>
 
   </a-entity>
 </a-scene>
@@ -70,7 +83,16 @@
   const ui = document.getElementById("ui");
   const info = document.getElementById("info");
   const card = document.getElementById("card");
-  const circles = document.querySelectorAll(".circle");
+  const avatar = document.getElementById("avatar");
+  const circles = document.querySelectorAll(".tap-circle");
+
+  const messages = {
+    creative: "🎨 Creative: I turn ideas into visuals.",
+    foodie: "🍜 Foodie: Food fuels my imagination.",
+    observant: "👀 Observant: I notice what others miss.",
+    camera: "📸 Moment Capturer: I freeze memories.",
+    curious: "🧠 Curious: Exploring AR & VR realities."
+  };
 
   card.addEventListener("targetFound", () => {
     ui.style.display = "block";
@@ -78,40 +100,33 @@
 
   card.addEventListener("targetLost", () => {
     ui.style.display = "none";
+    avatar.setAttribute("visible", false);
   });
 
-  const messages = [
-    "🎨 Creative: I love turning ideas into visuals.",
-    "🍜 Foodie: Food fuels my imagination.",
-    "👀 Observant: I notice what others miss.",
-    "📸 Moment Capturer: I freeze memories in time.",
-    "🧠 Curious: Exploring AR & VR realities."
-  ];
-
-  circles.forEach((circle, index) => {
+  circles.forEach(circle => {
     circle.addEventListener("click", () => {
 
-      // bring clicked circle UP
-      circle.setAttribute("animation", `
+      const type = circle.dataset.avatar;
+
+      avatar.setAttribute("material", `src: #img-${type}`);
+      avatar.setAttribute("position", `${circle.object3D.position.x} ${circle.object3D.position.y} 0.3`);
+      avatar.setAttribute("visible", true);
+
+      avatar.setAttribute("animation", `
         property: position;
-        to: ${circle.object3D.position.x} ${circle.object3D.position.y} 0.25;
+        to: ${circle.object3D.position.x} ${circle.object3D.position.y + 0.15} 0.35;
         dur: 500;
         easing: easeOutElastic
       `);
 
-      // show message
-      info.innerText = messages[index];
-
-      // after 1.2s, send it back down
-      setTimeout(() => {
-        circle.setAttribute("animation", `
-          property: position;
-          to: ${circle.object3D.position.x} ${circle.object3D.position.y} 0.01;
-          dur: 400;
-          easing: easeInOutQuad
-        `);
-      }, 1200);
+      info.innerText = messages[type];
     });
+  });
+
+  // SECOND INTERACTION: tap avatar
+  avatar.addEventListener("click", () => {
+    info.innerText = "✨ This avatar holds more stories…";
+    avatar.setAttribute("animation", "property: rotation; to: 0 360 0; dur: 800");
   });
 </script>
 
