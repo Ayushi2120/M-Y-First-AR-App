@@ -1,271 +1,157 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>AYUSHI PADHY // DIGITAL IDENTITY</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <style>
+    body { margin: 0; overflow: hidden; }
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@300&display=swap" rel="stylesheet">
+    /* Dialogue UI */
+    #ui-overlay {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 85%;
+      background: rgba(0, 0, 0, 0.85);
+      color: #00ffff;
+      padding: 15px;
+      border-radius: 15px;
+      border: 2px solid #00ffff;
+      font-family: monospace;
+      text-align: center;
+      display: none;
+      z-index: 100;
+    }
 
-<style>
-:root{
-  --cyan:#00f3ff;
-  --pink:#ff00ff;
-  --bg:#050505;
-}
+    .glitch {
+      text-shadow: 2px 2px #ff00ff;
+      animation: pulse 1.2s infinite;
+    }
 
-html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  background:var(--bg);
-  color:white;
-  font-family:'JetBrains Mono',monospace;
-  overflow:hidden;
-}
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.75; }
+      100% { opacity: 1; }
+    }
 
-#canvas-container{
-  position:fixed;
-  inset:0;
-}
-
-.overlay{
-  position:absolute;
-  inset:0;
-  padding:25px;
-  display:flex;
-  justify-content:space-between;
-  pointer-events:none;
-  z-index:10;
-}
-
-.hud{
-  font-size:12px;
-  color:var(--cyan);
-  letter-spacing:2px;
-  text-transform:uppercase;
-  text-shadow:0 0 10px var(--cyan);
-}
-
-#ui{
-  position:absolute;
-  bottom:12%;
-  left:50%;
-  transform:translateX(-50%);
-  text-align:center;
-  z-index:20;
-  pointer-events:all;
-}
-
-.btn{
-  border:1px solid var(--cyan);
-  background:rgba(0,243,255,0.1);
-  color:var(--cyan);
-  padding:10px 28px;
-  cursor:pointer;
-  font-family:'Orbitron',sans-serif;
-  transition:0.3s;
-  clip-path:polygon(10% 0,100% 0,90% 100%,0 100%);
-}
-
-.btn:hover{
-  background:var(--cyan);
-  color:black;
-  box-shadow:0 0 20px var(--cyan);
-}
-
-#panel{
-  position:absolute;
-  inset:0;
-  display:none;
-  justify-content:center;
-  align-items:center;
-  z-index:30;
-}
-
-#panel-box{
-  width:320px;
-  background:rgba(0,0,0,0.85);
-  border:1px solid var(--pink);
-  padding:20px;
-  box-shadow:0 0 30px rgba(255,0,255,0.25);
-}
-
-h2{
-  font-family:'Orbitron',sans-serif;
-  color:var(--pink);
-  margin-top:0;
-}
-</style>
+    button {
+      margin: 6px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+  </style>
 </head>
 
 <body>
 
-<div class="overlay">
-  <div class="hud">
-    AYUSHI PADHY<br>
-    AR / VR CREATIVE TECHNOLOGIST
-  </div>
-  <div class="hud" style="text-align:right">
-    DIGITAL IDENTITY<br>
-    STATUS: ACTIVE
-  </div>
+<!-- UI Overlay -->
+<div id="ui-overlay">
+  <p class="glitch" id="dialogue-text">
+    Are you sure you want to know about me?
+  </p>
+  <button onclick="changeMood('creative')" style="background:#00ffff;">Yes 😄</button>
+  <button onclick="changeMood('curious')" style="background:#ff00ff; color:white;">Tell me more 👁️</button>
 </div>
 
-<div id="ui">
-  <div class="hud" style="margin-bottom:15px">MOVE / TILT TO EXPLORE</div>
-  <button class="btn" id="enter">ENTER IDENTITY</button>
-</div>
+<a-scene
+  mindar-image="imageTargetSrc: ./ayushi-card.mind;"
+  color-space="sRGB"
+  renderer="colorManagement: true, physicallyCorrectLights"
+  vr-mode-ui="enabled: false"
+  device-orientation-permission-ui="enabled: false"
+>
 
-<div id="panel">
-  <div id="panel-box">
-    <h2 id="panel-title"></h2>
-    <div id="panel-content" style="font-size:14px;line-height:1.6"></div>
-    <button class="btn" style="margin-top:15px;font-size:10px" onclick="closePanel()">CLOSE</button>
-  </div>
-</div>
+  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-<div id="canvas-container"></div>
+  <!-- Image Target -->
+  <a-entity id="card-target" mindar-image-target="targetIndex: 0">
+
+    <!-- Soft Glow Plane -->
+    <a-plane
+      position="0 0 0"
+      width="1.2"
+      height="0.7"
+      material="color: #00ffff; transparent: true; opacity: 0.2"
+      animation="property: material.opacity; from: 0.15; to: 0.4; dir: alternate; dur: 1200; loop: true">
+    </a-plane>
+
+    <!-- AR Avatar (Cute + Mystery) -->
+    <a-entity
+      id="avatar"
+      position="0 0.35 0.15"
+      scale="0.25 0.25 0.25"
+      animation="property: position; y: 0.4; dir: alternate; dur: 2000; loop: true; easing: easeInOutSine">
+
+      <a-sphere radius="0.25" color="#ffffff"></a-sphere>
+      <a-sphere radius="0.05" color="black" position="-0.08 0.05 0.22"></a-sphere>
+      <a-sphere radius="0.05" color="black" position="0.08 0.05 0.22"></a-sphere>
+
+    </a-entity>
+
+    <!-- Name Text -->
+    <a-text
+      value="AYUSHI PADHY"
+      align="center"
+      color="#ffffff"
+      position="0 0.75 0"
+      scale="0.6 0.6 0.6">
+    </a-text>
+
+    <!-- Role Text -->
+    <a-text
+      value="Engineering Student | AR & VR"
+      align="center"
+      color="#00ffff"
+      position="0 0.65 0"
+      scale="0.45 0.45 0.45">
+    </a-text>
+
+    <!-- Mood Orb -->
+    <a-octahedron
+      id="mood-orb"
+      position="0.5 0.25 0.15"
+      radius="0.1"
+      color="#ff00ff"
+      animation="property: rotation; to: 0 360 0; loop: true; dur: 3500">
+    </a-octahedron>
+
+  </a-entity>
+</a-scene>
 
 <script>
-/* SCENE */
-const scene=new THREE.Scene();
-const camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,100);
-camera.position.z=5;
+  const target = document.querySelector('#card-target');
+  const ui = document.querySelector('#ui-overlay');
+  const dialogue = document.querySelector('#dialogue-text');
+  const avatar = document.querySelector('#avatar');
+  const orb = document.querySelector('#mood-orb');
 
-const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
-renderer.setSize(innerWidth,innerHeight);
-document.getElementById("canvas-container").appendChild(renderer.domElement);
-
-/* LIGHT */
-scene.add(new THREE.AmbientLight(0xffffff,0.6));
-const pLight=new THREE.PointLight(0x00f3ff,2);
-pLight.position.set(5,5,5);
-scene.add(pLight);
-
-/* CARD */
-const geo=new THREE.BoxGeometry(3.6,2.1,0.1);
-const mat=new THREE.MeshPhongMaterial({
-  color:0x111111,
-  emissive:0x00f3ff,
-  emissiveIntensity:0.25,
-  shininess:100
-});
-const card=new THREE.Mesh(geo,mat);
-
-const edges=new THREE.LineSegments(
-  new THREE.EdgesGeometry(geo),
-  new THREE.LineBasicMaterial({color:0x00f3ff})
-);
-card.add(edges);
-scene.add(card);
-
-/* DATA NODES */
-const data=[
-{
- title:"ABOUT",
- content:"Ayushi Padhy<br><br>AR/VR developer exploring hyper-reality, AI-driven experiences and immersive digital identities."
-},
-{
- title:"SKILLS",
- content:"• AR / VR Development<br>• Three.js & WebXR<br>• Unity & C#<br>• UI/UX + Interaction Design"
-},
-{
- title:"PROJECTS",
- content:"• AR Business Card<br>• Hyper-Reality Interfaces<br>• AI + XR Experiments"
-},
-{
- title:"CONTACT",
- content:"Email: ayushi@email.com<br>Portfolio: coming soon<br>Location: India"
-}
-];
-
-const nodes=[];
-data.forEach((d,i)=>{
- const m=new THREE.Mesh(
-  new THREE.IcosahedronGeometry(0.32,0),
-  new THREE.MeshPhongMaterial({color:0xff00ff,wireframe:true})
- );
- m.visible=false;
- m.userData=d;
- scene.add(m);
- nodes.push(m);
-});
-
-/* INTERACTION */
-let stage=0;
-let mx=0,my=0;
-
-addEventListener("mousemove",e=>{
- mx=e.clientX/innerWidth-0.5;
- my=e.clientY/innerHeight-0.5;
-});
-
-document.getElementById("enter").onclick=()=>{
- stage=1;
- document.getElementById("ui").style.display="none";
- gsap.to(card.scale,{x:0,y:0,z:0,duration:1});
-
- nodes.forEach((n,i)=>{
-  n.visible=true;
-  const a=i/nodes.length*Math.PI*2;
-  gsap.to(n.position,{
-    x:Math.cos(a)*2,
-    y:Math.sin(a)*1.6,
-    duration:1.5,
-    delay:0.5,
-    ease:"elastic.out"
+  target.addEventListener("targetFound", () => {
+    ui.style.display = "block";
   });
- });
-};
 
-/* RAYCAST */
-const ray=new THREE.Raycaster();
-const ptr=new THREE.Vector2();
+  target.addEventListener("targetLost", () => {
+    ui.style.display = "none";
+  });
 
-addEventListener("click",e=>{
- if(stage!==1)return;
- ptr.x=e.clientX/innerWidth*2-1;
- ptr.y=-(e.clientY/innerHeight)*2+1;
- ray.setFromCamera(ptr,camera);
- const hit=ray.intersectObjects(nodes);
- if(hit.length){
-  openPanel(hit[0].object.userData);
-  gsap.to(hit[0].object.rotation,{y:"+="+Math.PI*2,duration:1});
- }
-});
-
-function openPanel(d){
- document.getElementById("panel").style.display="flex";
- document.getElementById("panel-title").innerHTML=d.title;
- document.getElementById("panel-content").innerHTML=d.content;
-}
-
-function closePanel(){
- document.getElementById("panel").style.display="none";
-}
-
-/* ANIMATE */
-function animate(){
- requestAnimationFrame(animate);
- card.rotation.x+=(my*0.4-card.rotation.x)*0.1;
- card.rotation.y+=(mx*0.4-card.rotation.y)*0.1;
- nodes.forEach(n=>{
-  n.rotation.x+=0.01;
-  n.rotation.y+=0.01;
- });
- renderer.render(scene,camera);
-}
-animate();
-
-addEventListener("resize",()=>{
- camera.aspect=innerWidth/innerHeight;
- camera.updateProjectionMatrix();
- renderer.setSize(innerWidth,innerHeight);
-});
+  function changeMood(mode) {
+    if (mode === 'creative') {
+      dialogue.innerText =
+        "I mix creativity with technology and turn ideas into experiences 🎨✨";
+      avatar.setAttribute('scale', '0.28 0.28 0.28');
+      orb.setAttribute('color', '#00ff99');
+    } else {
+      dialogue.innerText =
+        "I observe details, ask questions, and explore reality through AR 👁️";
+      avatar.setAttribute('scale', '0.22 0.22 0.22');
+      orb.setAttribute('color', '#ff4444');
+    }
+  }
 </script>
 
 </body>
