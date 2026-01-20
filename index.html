@@ -10,7 +10,11 @@
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
   <style>
-    body { margin: 0; overflow: hidden; }
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: monospace;
+    }
 
     #ui-overlay {
       position: fixed;
@@ -23,7 +27,6 @@
       padding: 15px;
       border-radius: 15px;
       border: 2px solid #00ffff;
-      font-family: monospace;
       text-align: center;
       display: none;
       z-index: 100;
@@ -49,7 +52,7 @@
 
 <body>
 
-<!-- UI -->
+<!-- UI Overlay -->
 <div id="ui-overlay">
   <p id="dialogue-text">Catch the glowing orb to know more about me 👀</p>
   <p id="score">Score: 0</p>
@@ -66,79 +69,110 @@
 
   <!-- FRONT SIDE -->
   <a-entity mindar-image-target="targetIndex: 1">
-    <a-text value="Flip the card to play 🎮"
-            align="center"
-            color="#ff00ff"
-            position="0 0 0.2">
+    <a-text
+      value="Flip the card to play 🎮"
+      align="center"
+      color="#ff00ff"
+      position="0 0 0.2"
+      scale="0.8 0.8 0.8">
     </a-text>
   </a-entity>
 
-  <!-- BACK SIDE (GAME ZONE) -->
+  <!-- BACK SIDE -->
   <a-entity id="card-target" mindar-image-target="targetIndex: 0">
+
+    <!-- Hologram Ring -->
+    <a-ring
+      radius-inner="0.14"
+      radius-outer="0.17"
+      color="#00ffff"
+      position="0 0.3 0.3"
+      animation="property: rotation;
+                 to: 0 360 0;
+                 loop: true;
+                 dur: 2000">
+    </a-ring>
 
     <!-- Game Orb -->
     <a-sphere
       id="game-orb"
-      radius="0.1"
+      radius="0.09"
       color="#00ffff"
       position="0 0.3 0.3"
-      animation="property: position;
-                 to: 0.4 0.5 0.3;
+      animation="property: scale;
                  dir: alternate;
-                 dur: 1500;
+                 dur: 800;
+                 to: 1.3 1.3 1.3;
                  loop: true"
       class="clickable">
     </a-sphere>
 
-    <!-- Name -->
+    <!-- Dynamic Name / Identity -->
     <a-text
+      id="name-text"
       value="AYUSHI PADHY"
       align="center"
       color="#ffffff"
-      position="0 -0.3 0.2"
-      scale="0.6 0.6 0.6">
+      position="0 -0.35 0.2"
+      scale="0.7 0.7 0.7">
     </a-text>
 
   </a-entity>
 </a-scene>
 
 <script>
-  let score = 0;
+let score = 0;
 
-  const target = document.querySelector('#card-target');
-  const ui = document.querySelector('#ui-overlay');
-  const orb = document.querySelector('#game-orb');
-  const scoreText = document.querySelector('#score');
-  const dialogue = document.querySelector('#dialogue-text');
+const target = document.querySelector('#card-target');
+const ui = document.querySelector('#ui-overlay');
+const orb = document.querySelector('#game-orb');
+const scoreText = document.querySelector('#score');
+const dialogue = document.querySelector('#dialogue-text');
+const nameText = document.querySelector('#name-text');
 
-  // Show UI when back side detected
-  target.addEventListener("targetFound", () => {
-    ui.style.display = "block";
-  });
+target.addEventListener("targetFound", () => {
+  ui.style.display = "block";
+});
 
-  target.addEventListener("targetLost", () => {
-    ui.style.display = "none";
-  });
+target.addEventListener("targetLost", () => {
+  ui.style.display = "none";
+});
 
-  // Game interaction
-  orb.addEventListener("click", () => {
-    score++;
-    scoreText.innerText = "Score: " + score;
+orb.addEventListener("click", () => {
+  score++;
+  scoreText.innerText = "Score: " + score;
 
-    orb.setAttribute("color", score % 2 === 0 ? "#ff00ff" : "#00ff99");
+  // vibration (mobile)
+  if (navigator.vibrate) navigator.vibrate(80);
 
-    dialogue.innerText =
-      score < 3
-        ? "Nice! Keep going 😄"
-        : "You unlocked my creative side 🎨✨";
-  });
+  // teleport orb
+  const x = (Math.random() - 0.5).toFixed(2);
+  const y = (Math.random() * 0.5 + 0.1).toFixed(2);
+  orb.setAttribute("position", `${x} ${y} 0.3`);
 
-  function resetGame() {
-    score = 0;
-    scoreText.innerText = "Score: 0";
-    dialogue.innerText = "Catch the glowing orb to know more about me 👀";
-    orb.setAttribute("color", "#00ffff");
+  orb.setAttribute("color", score % 2 === 0 ? "#ff00ff" : "#00ff99");
+
+  if (score === 2) {
+    dialogue.innerText = "You found my curiosity 🔍";
+    nameText.setAttribute("value", "CREATIVE THINKER");
   }
+  else if (score === 4) {
+    dialogue.innerText = "Tech + Art = Me 🚀";
+    nameText.setAttribute("value", "AR | AI | DESIGN");
+  }
+  else if (score >= 6) {
+    dialogue.innerText = "You unlocked my digital soul 👁️✨";
+    nameText.setAttribute("value", "FUTURE BUILDER");
+  }
+});
+
+function resetGame() {
+  score = 0;
+  scoreText.innerText = "Score: 0";
+  dialogue.innerText = "Catch the glowing orb to know more about me 👀";
+  orb.setAttribute("color", "#00ffff");
+  nameText.setAttribute("value", "AYUSHI PADHY");
+}
 </script>
 
 </body>
