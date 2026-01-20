@@ -1,349 +1,272 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NEOCARD // Digital Identity Fragment</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@300&display=swap" rel="stylesheet">
-    
-    <style>
-        :root {
-            --neon-blue: #00f3ff;
-            --neon-pink: #ff00ff;
-            --bg-dark: #050505;
-        }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AYUSHI PADHY // DIGITAL IDENTITY</title>
 
-        body, html {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: var(--bg-dark);
-            color: white;
-            font-family: 'JetBrains Mono', monospace;
-            overflow: hidden;
-            user-select: none;
-        }
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.160.0/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
 
-        #canvas-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=JetBrains+Mono:wght@300&display=swap" rel="stylesheet">
 
-        /* UI Overlays */
-        .overlay {
-            position: absolute;
-            z-index: 10;
-            pointer-events: none;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 30px;
-            box-sizing: border-box;
-        }
+<style>
+:root{
+  --cyan:#00f3ff;
+  --pink:#ff00ff;
+  --bg:#050505;
+}
 
-        .hud-text {
-            color: var(--neon-blue);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            font-size: 12px;
-            text-shadow: 0 0 10px var(--neon-blue);
-        }
+html,body{
+  margin:0;
+  width:100%;
+  height:100%;
+  background:var(--bg);
+  color:white;
+  font-family:'JetBrains Mono',monospace;
+  overflow:hidden;
+}
 
-        #boot-screen {
-            position: fixed;
-            inset: 0;
-            background: black;
-            z-index: 100;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            transition: opacity 1s ease;
-        }
+#canvas-container{
+  position:fixed;
+  inset:0;
+}
 
-        .loader-bar {
-            width: 200px;
-            height: 2px;
-            background: #222;
-            margin-top: 20px;
-            position: relative;
-        }
+.overlay{
+  position:absolute;
+  inset:0;
+  padding:25px;
+  display:flex;
+  justify-content:space-between;
+  pointer-events:none;
+  z-index:10;
+}
 
-        .loader-progress {
-            position: absolute;
-            height: 100%;
-            background: var(--neon-blue);
-            width: 0%;
-        }
+.hud{
+  font-size:12px;
+  color:var(--cyan);
+  letter-spacing:2px;
+  text-transform:uppercase;
+  text-shadow:0 0 10px var(--cyan);
+}
 
-        #game-ui {
-            position: absolute;
-            bottom: 10%;
-            left: 50%;
-            transform: translateX(-50%);
-            text-align: center;
-            z-index: 20;
-            pointer-events: all;
-        }
+#ui{
+  position:absolute;
+  bottom:12%;
+  left:50%;
+  transform:translateX(-50%);
+  text-align:center;
+  z-index:20;
+  pointer-events:all;
+}
 
-        .btn {
-            background: rgba(0, 243, 255, 0.1);
-            border: 1px solid var(--neon-blue);
-            color: var(--neon-blue);
-            padding: 10px 25px;
-            font-family: 'Orbitron', sans-serif;
-            cursor: pointer;
-            transition: all 0.3s;
-            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0% 100%);
-        }
+.btn{
+  border:1px solid var(--cyan);
+  background:rgba(0,243,255,0.1);
+  color:var(--cyan);
+  padding:10px 28px;
+  cursor:pointer;
+  font-family:'Orbitron',sans-serif;
+  transition:0.3s;
+  clip-path:polygon(10% 0,100% 0,90% 100%,0 100%);
+}
 
-        .btn:hover {
-            background: var(--neon-blue);
-            color: black;
-            box-shadow: 0 0 20px var(--neon-blue);
-        }
+.btn:hover{
+  background:var(--cyan);
+  color:black;
+  box-shadow:0 0 20px var(--cyan);
+}
 
-        .hidden { display: none !important; }
+#panel{
+  position:absolute;
+  inset:0;
+  display:none;
+  justify-content:center;
+  align-items:center;
+  z-index:30;
+}
 
-        /* Floating Info Panels */
-        #info-panel {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 300px;
-            background: rgba(0, 0, 0, 0.8);
-            border: 1px solid var(--neon-pink);
-            padding: 20px;
-            pointer-events: all;
-            display: none;
-            z-index: 30;
-            box-shadow: 0 0 30px rgba(255, 0, 255, 0.2);
-        }
+#panel-box{
+  width:320px;
+  background:rgba(0,0,0,0.85);
+  border:1px solid var(--pink);
+  padding:20px;
+  box-shadow:0 0 30px rgba(255,0,255,0.25);
+}
 
-        h2 { font-family: 'Orbitron', sans-serif; color: var(--neon-pink); margin-top: 0; }
-    </style>
+h2{
+  font-family:'Orbitron',sans-serif;
+  color:var(--pink);
+  margin-top:0;
+}
+</style>
 </head>
+
 <body>
 
-    <div id="boot-screen">
-        <div class="hud-text">Initializing Identity Link...</div>
-        <div class="loader-bar"><div class="loader-progress"></div></div>
-    </div>
+<div class="overlay">
+  <div class="hud">
+    AYUSHI PADHY<br>
+    AR / VR CREATIVE TECHNOLOGIST
+  </div>
+  <div class="hud" style="text-align:right">
+    DIGITAL IDENTITY<br>
+    STATUS: ACTIVE
+  </div>
+</div>
 
-    <div class="overlay">
-        <div class="hud-text">NEOCARD // V1.0.4<br>STATUS: ENCRYPTED</div>
-        <div class="hud-text" style="text-align: right;">LOCATION: NULL_SPACE<br>SIGNAL: STABLE</div>
-    </div>
+<div id="ui">
+  <div class="hud" style="margin-bottom:15px">MOVE / TILT TO EXPLORE</div>
+  <button class="btn" id="enter">ENTER IDENTITY</button>
+</div>
 
-    <div id="game-ui">
-        <div id="instruction" class="hud-text" style="margin-bottom: 20px;">[ MOVE MOUSE TO ROTATE ]</div>
-        <button id="hack-btn" class="btn">INITIALIZE HACK</button>
-    </div>
+<div id="panel">
+  <div id="panel-box">
+    <h2 id="panel-title"></h2>
+    <div id="panel-content" style="font-size:14px;line-height:1.6"></div>
+    <button class="btn" style="margin-top:15px;font-size:10px" onclick="closePanel()">CLOSE</button>
+  </div>
+</div>
 
-    <div id="info-panel">
-        <h2 id="panel-title">SYSTEM_DATA</h2>
-        <div id="panel-content" style="font-size: 14px; line-height: 1.6;"></div>
-        <button class="btn" style="margin-top: 20px; font-size: 10px;" onclick="closePanel()">CLOSE</button>
-    </div>
+<div id="canvas-container"></div>
 
-    <div id="canvas-container"></div>
+<script>
+/* SCENE */
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(70,innerWidth/innerHeight,0.1,100);
+camera.position.z=5;
 
-    <script>
-        // --- 1. SETUP THREE.JS SCENE ---
-        const container = document.getElementById('canvas-container');
-        const scene = new THREE.Scene();
-        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
-        renderer.setSize(window.innerWidth, window.innerHeight);
-        container.appendChild(renderer.domElement);
+const renderer=new THREE.WebGLRenderer({antialias:true,alpha:true});
+renderer.setSize(innerWidth,innerHeight);
+document.getElementById("canvas-container").appendChild(renderer.domElement);
 
-        // Lights
-        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5);
-        scene.add(ambientLight);
-        const pointLight = new THREE.PointLight(0x00f3ff, 2);
-        pointLight.position.set(5, 5, 5);
-        scene.add(pointLight);
+/* LIGHT */
+scene.add(new THREE.AmbientLight(0xffffff,0.6));
+const pLight=new THREE.PointLight(0x00f3ff,2);
+pLight.position.set(5,5,5);
+scene.add(pLight);
 
-        // --- 2. CREATE CARD OBJECT ---
-        const cardGeometry = new THREE.BoxGeometry(3.5, 2, 0.1);
-        const cardMaterial = new THREE.MeshPhongMaterial({
-            color: 0x111111,
-            emissive: 0x00f3ff,
-            emissiveIntensity: 0.2,
-            shininess: 100
-        });
-        const card = new THREE.Mesh(cardGeometry, cardMaterial);
-        
-        // Add wireframe glow
-        const wireframe = new THREE.LineSegments(
-            new THREE.EdgesGeometry(cardGeometry),
-            new THREE.LineBasicMaterial({ color: 0x00f3ff })
-        );
-        card.add(wireframe);
-        scene.add(card);
+/* CARD */
+const geo=new THREE.BoxGeometry(3.6,2.1,0.1);
+const mat=new THREE.MeshPhongMaterial({
+  color:0x111111,
+  emissive:0x00f3ff,
+  emissiveIntensity:0.25,
+  shininess:100
+});
+const card=new THREE.Mesh(geo,mat);
 
-        // --- 3. CREATE FLOATING NODES (STAGES) ---
-        const nodes = [];
-        const nodeData = [
-            { title: "SKILLS", content: "• JavaScript / Three.js<br>• UI/UX Engineering<br>• Cyber-Security Architecture", color: 0x00f3ff },
-            { title: "PROJECTS", content: "• Project Neon: AR Dashboard<br>• Void-OS: Custom Kernel<br>• Neural-Link Interface", color: 0xff00ff },
-            { title: "CONTACT", content: "EMAIL: user@neocard.dev<br>GITHUB: /cyber-phantom<br>SIGNAL: +1-800-HACK", color: 0x00ff00 }
-        ];
+const edges=new THREE.LineSegments(
+  new THREE.EdgesGeometry(geo),
+  new THREE.LineBasicMaterial({color:0x00f3ff})
+);
+card.add(edges);
+scene.add(card);
 
-        function createNodes() {
-            nodeData.forEach((data, i) => {
-                const geo = new THREE.IcosahedronGeometry(0.3, 0);
-                const mat = new THREE.MeshPhongMaterial({ color: data.color, wireframe: true });
-                const node = new THREE.Mesh(geo, mat);
-                node.visible = false;
-                node.userData = data;
-                nodes.push(node);
-                scene.add(node);
-            });
-        }
-        createNodes();
+/* DATA NODES */
+const data=[
+{
+ title:"ABOUT",
+ content:"Ayushi Padhy<br><br>AR/VR developer exploring hyper-reality, AI-driven experiences and immersive digital identities."
+},
+{
+ title:"SKILLS",
+ content:"• AR / VR Development<br>• Three.js & WebXR<br>• Unity & C#<br>• UI/UX + Interaction Design"
+},
+{
+ title:"PROJECTS",
+ content:"• AR Business Card<br>• Hyper-Reality Interfaces<br>• AI + XR Experiments"
+},
+{
+ title:"CONTACT",
+ content:"Email: ayushi@email.com<br>Portfolio: coming soon<br>Location: India"
+}
+];
 
-        camera.position.z = 5;
+const nodes=[];
+data.forEach((d,i)=>{
+ const m=new THREE.Mesh(
+  new THREE.IcosahedronGeometry(0.32,0),
+  new THREE.MeshPhongMaterial({color:0xff00ff,wireframe:true})
+ );
+ m.visible=false;
+ m.userData=d;
+ scene.add(m);
+ nodes.push(m);
+});
 
-        // --- 4. GAME LOGIC & INTERACTION ---
-        let currentStage = 1;
-        let mouseX = 0, mouseY = 0;
+/* INTERACTION */
+let stage=0;
+let mx=0,my=0;
 
-        // Parallax Effect
-        window.addEventListener('mousemove', (e) => {
-            mouseX = (e.clientX / window.innerWidth) - 0.5;
-            mouseY = (e.clientY / window.innerHeight) - 0.5;
-        });
+addEventListener("mousemove",e=>{
+ mx=e.clientX/innerWidth-0.5;
+ my=e.clientY/innerHeight-0.5;
+});
 
-        // Device Tilt Support
-        window.addEventListener('deviceorientation', (e) => {
-            if(e.beta) {
-                mouseX = e.gamma / 45;
-                mouseY = e.beta / 45;
-            }
-        });
+document.getElementById("enter").onclick=()=>{
+ stage=1;
+ document.getElementById("ui").style.display="none";
+ gsap.to(card.scale,{x:0,y:0,z:0,duration:1});
 
-        // Level 1 -> Level 2 Hack
-        document.getElementById('hack-btn').addEventListener('click', () => {
-            if(currentStage === 1) {
-                currentStage = 2;
-                document.getElementById('instruction').innerText = "[ SELECT A DATA CORE ]";
-                document.getElementById('hack-btn').classList.add('hidden');
-                
-                // Split Animation
-                gsap.to(card.scale, { x: 0, y: 0, z: 0, duration: 1, ease: "back.in" });
-                
-                nodes.forEach((node, i) => {
-                    node.visible = true;
-                    node.position.set(0,0,0);
-                    const angle = (i / nodes.length) * Math.PI * 2;
-                    gsap.to(node.position, {
-                        x: Math.cos(angle) * 2,
-                        y: Math.sin(angle) * 2,
-                        duration: 1.5,
-                        delay: 0.5,
-                        ease: "elastic.out(1, 0.5)"
-                    });
-                });
-            }
-        });
+ nodes.forEach((n,i)=>{
+  n.visible=true;
+  const a=i/nodes.length*Math.PI*2;
+  gsap.to(n.position,{
+    x:Math.cos(a)*2,
+    y:Math.sin(a)*1.6,
+    duration:1.5,
+    delay:0.5,
+    ease:"elastic.out"
+  });
+ });
+};
 
-        // Raycasting for clicking nodes
-        const raycaster = new THREE.Raycaster();
-        const pointer = new THREE.Vector2();
+/* RAYCAST */
+const ray=new THREE.Raycaster();
+const ptr=new THREE.Vector2();
 
-        window.addEventListener('click', (event) => {
-            if(currentStage !== 2) return;
+addEventListener("click",e=>{
+ if(stage!==1)return;
+ ptr.x=e.clientX/innerWidth*2-1;
+ ptr.y=-(e.clientY/innerHeight)*2+1;
+ ray.setFromCamera(ptr,camera);
+ const hit=ray.intersectObjects(nodes);
+ if(hit.length){
+  openPanel(hit[0].object.userData);
+  gsap.to(hit[0].object.rotation,{y:"+="+Math.PI*2,duration:1});
+ }
+});
 
-            pointer.x = (event.clientX / window.innerWidth) * 2 - 1;
-            pointer.y = -(event.clientY / window.innerHeight) * 2 + 1;
+function openPanel(d){
+ document.getElementById("panel").style.display="flex";
+ document.getElementById("panel-title").innerHTML=d.title;
+ document.getElementById("panel-content").innerHTML=d.content;
+}
 
-            raycaster.setFromCamera(pointer, camera);
-            const intersects = raycaster.intersectObjects(nodes);
+function closePanel(){
+ document.getElementById("panel").style.display="none";
+}
 
-            if (intersects.length > 0) {
-                const data = intersects[0].object.userData;
-                showPanel(data);
-                // Aesthetic feedback
-                gsap.to(intersects[0].object.rotation, { y: Math.PI * 2, duration: 1 });
-            }
-        });
+/* ANIMATE */
+function animate(){
+ requestAnimationFrame(animate);
+ card.rotation.x+=(my*0.4-card.rotation.x)*0.1;
+ card.rotation.y+=(mx*0.4-card.rotation.y)*0.1;
+ nodes.forEach(n=>{
+  n.rotation.x+=0.01;
+  n.rotation.y+=0.01;
+ });
+ renderer.render(scene,camera);
+}
+animate();
 
-        function showPanel(data) {
-            const panel = document.getElementById('info-panel');
-            document.getElementById('panel-title').innerText = data.title;
-            document.getElementById('panel-content').innerHTML = data.content;
-            panel.style.display = 'block';
-            gsap.fromTo(panel, { opacity: 0, scale: 0.8 }, { opacity: 1, scale: 1, duration: 0.4 });
-        }
+addEventListener("resize",()=>{
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
+});
+</script>
 
-        window.closePanel = () => {
-            gsap.to('#info-panel', { opacity: 0, scale: 0.8, duration: 0.3, onComplete: () => {
-                document.getElementById('info-panel').style.display = 'none';
-            }});
-        };
-
-        // --- 5. ANIMATION LOOP ---
-        function animate() {
-            requestAnimationFrame(animate);
-
-            // Subtle rotation based on mouse/tilt
-            const targetRotX = mouseY * 0.5;
-            const targetRotY = mouseX * 0.5;
-            
-            card.rotation.x += (targetRotX - card.rotation.x) * 0.1;
-            card.rotation.y += (targetRotY - card.rotation.y) * 0.1;
-
-            // Animate nodes orbiting
-            if(currentStage === 2) {
-                nodes.forEach((node, i) => {
-                    node.rotation.x += 0.01;
-                    node.rotation.y += 0.01;
-                    // Hover effect
-                    node.position.y += Math.sin(Date.now() * 0.002 + i) * 0.005;
-                });
-                
-                // Camera parallax
-                camera.position.x += (mouseX * 2 - camera.position.x) * 0.05;
-                camera.position.y += (-mouseY * 2 - camera.position.y) * 0.05;
-                camera.lookAt(0,0,0);
-            }
-
-            renderer.render(scene, camera);
-        }
-
-        // --- 6. INITIALIZATION ---
-        window.addEventListener('load', () => {
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += 5;
-                document.querySelector('.loader-progress').style.width = progress + '%';
-                if(progress >= 100) {
-                    clearInterval(interval);
-                    gsap.to('#boot-screen', { opacity: 0, duration: 1, onComplete: () => {
-                        document.getElementById('boot-screen').style.display = 'none';
-                    }});
-                    animate();
-                }
-            }, 50);
-        });
-
-        // Handle Resize
-        window.addEventListener('resize', () => {
-            camera.aspect = window.innerWidth / window.innerHeight;
-            camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
-        });
-    </script>
 </body>
 </html>
