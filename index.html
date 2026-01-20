@@ -1,48 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-
-  <!-- MindAR -->
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
   <style>
     body { margin: 0; overflow: hidden; }
 
-    #ui-overlay {
+    #ui {
       position: fixed;
-      bottom: 20px;
+      bottom: 15px;
       left: 50%;
       transform: translateX(-50%);
-      width: 85%;
+      width: 90%;
       background: rgba(0,0,0,0.85);
       color: #00ffff;
       padding: 15px;
-      border-radius: 15px;
-      border: 2px solid #00ffff;
+      border-radius: 12px;
       font-family: monospace;
       text-align: center;
       display: none;
-      z-index: 100;
-    }
-
-    #score {
-      color: #00ff99;
-      font-size: 18px;
-    }
-
-    button {
-      margin-top: 8px;
-      padding: 8px 14px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-      background: #ff00ff;
-      color: white;
+      z-index: 10;
     }
   </style>
 </head>
@@ -50,95 +30,84 @@
 <body>
 
 <!-- UI -->
-<div id="ui-overlay">
-  <p id="dialogue-text">Catch the glowing orb to know more about me 👀</p>
-  <p id="score">Score: 0</p>
-  <button onclick="resetGame()">Reset Game</button>
+<div id="ui">
+  <p id="text">Tap any circle to explore my world ✨</p>
 </div>
 
 <a-scene
   mindar-image="imageTargetSrc: ./targets.mind;"
-  vr-mode-ui="enabled: false"
-  device-orientation-permission-ui="enabled: false"
->
+  vr-mode-ui="enabled:false"
+  device-orientation-permission-ui="enabled:false">
 
-  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+  <a-camera position="0 0 0" look-controls="enabled:false"></a-camera>
 
-  <!-- FRONT SIDE -->
-  <a-entity mindar-image-target="targetIndex: 1">
-    <a-text value="Flip the card to play 🎮"
-            align="center"
-            color="#ff00ff"
-            position="0 0 0.2">
-    </a-text>
-  </a-entity>
+  <!-- FRONT SIDE TARGET -->
+  <a-entity id="card" mindar-image-target="targetIndex: 0">
 
-  <!-- BACK SIDE (GAME ZONE) -->
-  <a-entity id="card-target" mindar-image-target="targetIndex: 0">
+    <!-- Glow -->
+    <a-plane width="1.2" height="0.7"
+      material="color:#00ffff; transparent:true; opacity:0.2"
+      animation="property:opacity; from:0.1; to:0.35; dir:alternate; dur:1200; loop:true">
+    </a-plane>
 
-    <!-- Game Orb -->
-    <a-sphere
-      id="game-orb"
-      radius="0.1"
-      color="#00ffff"
-      position="0 0.3 0.3"
-      animation="property: position;
-                 to: 0.4 0.5 0.3;
-                 dir: alternate;
-                 dur: 1500;
-                 loop: true"
-      class="clickable">
-    </a-sphere>
+    <!-- 5 PORTALS -->
 
-    <!-- Name -->
-    <a-text
-      value="AYUSHI PADHY"
-      align="center"
-      color="#ffffff"
-      position="0 -0.3 0.2"
-      scale="0.6 0.6 0.6">
-    </a-text>
+    <!-- Creative -->
+    <a-circle class="portal" position="-0.4 0.2 0.2" radius="0.12" color="#ff69b4"></a-circle>
+
+    <!-- Foodie -->
+    <a-circle class="portal" position="0 0.25 0.2" radius="0.12" color="#ffa500"></a-circle>
+
+    <!-- Observant -->
+    <a-circle class="portal" position="0.4 0.2 0.2" radius="0.12" color="#00ff99"></a-circle>
+
+    <!-- Moment Capturer -->
+    <a-circle class="portal" position="-0.2 -0.2 0.2" radius="0.12" color="#87cefa"></a-circle>
+
+    <!-- Curious -->
+    <a-circle class="portal" position="0.2 -0.2 0.2" radius="0.12" color="#9370db"></a-circle>
 
   </a-entity>
 </a-scene>
 
 <script>
-  let score = 0;
+  const ui = document.getElementById("ui");
+  const text = document.getElementById("text");
+  const portals = document.querySelectorAll(".portal");
+  const card = document.getElementById("card");
 
-  const target = document.querySelector('#card-target');
-  const ui = document.querySelector('#ui-overlay');
-  const orb = document.querySelector('#game-orb');
-  const scoreText = document.querySelector('#score');
-  const dialogue = document.querySelector('#dialogue-text');
-
-  // Show UI when back side detected
-  target.addEventListener("targetFound", () => {
+  card.addEventListener("targetFound", () => {
     ui.style.display = "block";
   });
 
-  target.addEventListener("targetLost", () => {
+  card.addEventListener("targetLost", () => {
     ui.style.display = "none";
   });
 
-  // Game interaction
-  orb.addEventListener("click", () => {
-    score++;
-    scoreText.innerText = "Score: " + score;
-
-    orb.setAttribute("color", score % 2 === 0 ? "#ff00ff" : "#00ff99");
-
-    dialogue.innerText =
-      score < 3
-        ? "Nice! Keep going 😄"
-        : "You unlocked my creative side 🎨✨";
+  portals[0].addEventListener("click", () => {
+    text.innerText = "🎨 Creative Mode: I turn ideas into visuals.";
+    portals[0].setAttribute("animation", "property:scale; to:1.3 1.3 1; dur:300");
   });
 
-  function resetGame() {
-    score = 0;
-    scoreText.innerText = "Score: 0";
-    dialogue.innerText = "Catch the glowing orb to know more about me 👀";
-    orb.setAttribute("color", "#00ffff");
-  }
+  portals[1].addEventListener("click", () => {
+    text.innerText = "🍜 Foodie Mode: Food fuels my creativity.";
+    portals[1].setAttribute("animation", "property:rotation; to:0 0 360; dur:800");
+  });
+
+  portals[2].addEventListener("click", () => {
+    text.innerText = "👀 Observant Mode: I notice details others miss.";
+    portals[2].setAttribute("animation", "property:opacity; from:1; to:0.3; dir:alternate; dur:400; loop:3");
+  });
+
+  portals[3].addEventListener("click", () => {
+    text.innerText = "📸 Moment Capturer: I love freezing memories.";
+    portals[3].setAttribute("animation", "property:position; y:-0.1; dir:alternate; dur:500; loop:2");
+  });
+
+  portals[4].addEventListener("click", () => {
+    text.innerText = "🧠 Curious Mind: Exploring AR & VR realities.";
+    portals[4].setAttribute("animation", "property:scale; to:0.8 0.8 1; dir:alternate; dur:400; loop:4");
+  });
 </script>
 
 </body>
