@@ -2,20 +2,23 @@
 <html>
 <head>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <!-- MindAR -->
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
   <style>
     body { margin: 0; overflow: hidden; }
 
-    /* Dialogue UI */
     #ui-overlay {
       position: fixed;
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
       width: 85%;
-      background: rgba(0, 0, 0, 0.85);
+      background: rgba(0,0,0,0.85);
       color: #00ffff;
       padding: 15px;
       border-radius: 15px;
@@ -60,7 +63,7 @@
 </div>
 
 <a-scene
-  mindar-image="imageTargetSrc: ./targets.mind;"
+  mindar-image="imageTargetSrc: ./ayushi-card.mind;"
   color-space="sRGB"
   renderer="colorManagement: true, physicallyCorrectLights"
   vr-mode-ui="enabled: false"
@@ -69,24 +72,64 @@
 
   <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-  <!-- Image Target -->
-  <a-entity id="card-target" mindar-image-target="targetIndex: 0">
+  <!-- ================= FRONT SIDE AR ================= -->
+  <a-entity mindar-image-target="targetIndex: 0">
 
-    <!-- Soft Glow Plane -->
+    <!-- Glow -->
     <a-plane
-      position="0 0 0"
       width="1.2"
       height="0.7"
-      material="color: #00ffff; transparent: true; opacity: 0.2"
-      animation="property: material.opacity; from: 0.15; to: 0.4; dir: alternate; dur: 1200; loop: true">
+      material="color:#00ffff; transparent:true; opacity:0.25"
+      animation="property: material.opacity; from:0.15; to:0.4; dir:alternate; dur:1200; loop:true">
     </a-plane>
 
-    <!-- AR Avatar (Cute + Mystery) -->
+    <!-- Name -->
+    <a-text
+      value="AYUSHI PADHY"
+      align="center"
+      color="#ffffff"
+      position="0 0.25 0.1"
+      scale="0.6 0.6 0.6">
+    </a-text>
+
+    <!-- Role -->
+    <a-text
+      value="Engineering Student | AR & VR"
+      align="center"
+      color="#00ffff"
+      position="0 0.1 0.1"
+      scale="0.45 0.45 0.45">
+    </a-text>
+
+    <!-- Hint -->
+    <a-text
+      value="Flip the card 👀"
+      align="center"
+      color="#ff00ff"
+      position="0 -0.2 0.1"
+      scale="0.35 0.35 0.35"
+      animation="property: opacity; from:0.3; to:1; dir:alternate; dur:1000; loop:true">
+    </a-text>
+
+  </a-entity>
+
+  <!-- ================= BACK SIDE AR ================= -->
+  <a-entity id="card-target" mindar-image-target="targetIndex: 1">
+
+    <!-- Glow -->
+    <a-plane
+      width="1.2"
+      height="0.7"
+      material="color:#00ffff; transparent:true; opacity:0.2"
+      animation="property: material.opacity; from:0.1; to:0.35; dir:alternate; dur:1200; loop:true">
+    </a-plane>
+
+    <!-- Avatar -->
     <a-entity
       id="avatar"
       position="0 0.35 0.15"
       scale="0.25 0.25 0.25"
-      animation="property: position; y: 0.4; dir: alternate; dur: 2000; loop: true; easing: easeInOutSine">
+      animation="property: position; y:0.4; dir:alternate; dur:2000; loop:true">
 
       <a-sphere radius="0.25" color="#ffffff"></a-sphere>
       <a-sphere radius="0.05" color="black" position="-0.08 0.05 0.22"></a-sphere>
@@ -94,34 +137,17 @@
 
     </a-entity>
 
-    <!-- Name Text -->
-    <a-text
-      value="AYUSHI PADHY"
-      align="center"
-      color="#ffffff"
-      position="0 0.75 0"
-      scale="0.6 0.6 0.6">
-    </a-text>
-
-    <!-- Role Text -->
-    <a-text
-      value="Engineering Student | AR & VR"
-      align="center"
-      color="#00ffff"
-      position="0 0.65 0"
-      scale="0.45 0.45 0.45">
-    </a-text>
-
     <!-- Mood Orb -->
     <a-octahedron
       id="mood-orb"
       position="0.5 0.25 0.15"
       radius="0.1"
       color="#ff00ff"
-      animation="property: rotation; to: 0 360 0; loop: true; dur: 3500">
+      animation="property: rotation; to:0 360 0; loop:true; dur:3500">
     </a-octahedron>
 
   </a-entity>
+
 </a-scene>
 
 <script>
@@ -156,4 +182,3 @@
 
 </body>
 </html>
-
