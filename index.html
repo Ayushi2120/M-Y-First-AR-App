@@ -10,53 +10,33 @@
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
   <style>
-    body {
-      margin: 0;
-      overflow: hidden;
-      font-family: monospace;
-    }
+    body { margin: 0; overflow: hidden; font-family: monospace; }
 
-    #ui-overlay {
+    #ui {
       position: fixed;
       bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      width: 85%;
+      width: 90%;
       background: rgba(0,0,0,0.85);
       color: #00ffff;
       padding: 15px;
-      border-radius: 15px;
+      border-radius: 14px;
       border: 2px solid #00ffff;
       text-align: center;
       display: none;
-      z-index: 100;
+      z-index: 10;
     }
 
-    #score {
-      color: #00ff99;
-      font-size: 18px;
-    }
-
-    button {
-      margin-top: 8px;
-      padding: 8px 14px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-      background: #ff00ff;
-      color: white;
-    }
+    #title { color: #ff00ff; font-size: 18px; }
   </style>
 </head>
 
 <body>
 
-<!-- UI Overlay -->
-<div id="ui-overlay">
-  <p id="dialogue-text">Catch the glowing orb to know more about me 👀</p>
-  <p id="score">Score: 0</p>
-  <button onclick="resetGame()">Reset Game</button>
+<div id="ui">
+  <div id="title">TRAIT</div>
+  <p id="desc">Tap a hologram to explore my traits</p>
 </div>
 
 <a-scene
@@ -65,114 +45,71 @@
   device-orientation-permission-ui="enabled: false"
 >
 
-  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+  <a-camera look-controls="enabled: false"></a-camera>
 
-  <!-- FRONT SIDE -->
-  <a-entity mindar-image-target="targetIndex: 1">
+  <!-- BACK SIDE TARGET -->
+  <a-entity id="card" mindar-image-target="targetIndex: 0">
+
+    <!-- Central Identity -->
     <a-text
-      value="Flip the card to play 🎮"
+      value="AYUSHI PADHY"
+      position="0 -0.45 0.2"
       align="center"
-      color="#ff00ff"
-      position="0 0 0.2"
-      scale="0.8 0.8 0.8">
+      scale="0.7 0.7 0.7"
+      color="#ffffff">
     </a-text>
-  </a-entity>
 
-  <!-- BACK SIDE -->
-  <a-entity id="card-target" mindar-image-target="targetIndex: 0">
-
-    <!-- Hologram Ring -->
-    <a-ring
-      radius-inner="0.14"
-      radius-outer="0.17"
-      color="#00ffff"
-      position="0 0.3 0.3"
-      animation="property: rotation;
-                 to: 0 360 0;
-                 loop: true;
-                 dur: 2000">
-    </a-ring>
-
-    <!-- Game Orb -->
-    <a-sphere
-      id="game-orb"
-      radius="0.09"
-      color="#00ffff"
-      position="0 0.3 0.3"
-      animation="property: scale;
-                 dir: alternate;
-                 dur: 800;
-                 to: 1.3 1.3 1.3;
-                 loop: true"
-      class="clickable">
+    <!-- TRAIT 1 -->
+    <a-sphere class="trait" color="#ff00ff" radius="0.07"
+      position="-0.35 0.25 0.3"
+      data-title="CREATIVITY"
+      data-desc="I turn ideas into expressive digital experiences.">
     </a-sphere>
 
-    <!-- Dynamic Name / Identity -->
-    <a-text
-      id="name-text"
-      value="AYUSHI PADHY"
-      align="center"
-      color="#ffffff"
-      position="0 -0.35 0.2"
-      scale="0.7 0.7 0.7">
-    </a-text>
+    <!-- TRAIT 2 -->
+    <a-sphere class="trait" color="#00ffff" radius="0.07"
+      position="0 0.4 0.3"
+      data-title="CURIOSITY"
+      data-desc="I constantly explore new technologies and concepts.">
+    </a-sphere>
+
+    <!-- TRAIT 3 -->
+    <a-sphere class="trait" color="#00ff99" radius="0.07"
+      position="0.35 0.25 0.3"
+      data-title="RESILIENCE"
+      data-desc="I learn, adapt, and grow through challenges.">
+    </a-sphere>
+
+    <!-- TRAIT 4 -->
+    <a-sphere class="trait" color="#ffaa00" radius="0.07"
+      position="-0.2 -0.05 0.3"
+      data-title="EMPATHY"
+      data-desc="I design with people and emotions in mind.">
+    </a-sphere>
+
+    <!-- TRAIT 5 -->
+    <a-sphere class="trait" color="#aa66ff" radius="0.07"
+      position="0.2 -0.05 0.3"
+      data-title="INNOVATION"
+      data-desc="I blend AR, AI, and design to build future-ready solutions.">
+    </a-sphere>
 
   </a-entity>
 </a-scene>
 
 <script>
-let score = 0;
+const ui = document.getElementById("ui");
+const title = document.getElementById("title");
+const desc = document.getElementById("desc");
 
-const target = document.querySelector('#card-target');
-const ui = document.querySelector('#ui-overlay');
-const orb = document.querySelector('#game-orb');
-const scoreText = document.querySelector('#score');
-const dialogue = document.querySelector('#dialogue-text');
-const nameText = document.querySelector('#name-text');
-
-target.addEventListener("targetFound", () => {
-  ui.style.display = "block";
+document.querySelectorAll(".trait").forEach(trait => {
+  trait.addEventListener("click", () => {
+    title.innerText = trait.dataset.title;
+    desc.innerText = trait.dataset.desc;
+    ui.style.display = "block";
+    navigator.vibrate?.(60);
+  });
 });
-
-target.addEventListener("targetLost", () => {
-  ui.style.display = "none";
-});
-
-orb.addEventListener("click", () => {
-  score++;
-  scoreText.innerText = "Score: " + score;
-
-  // vibration (mobile)
-  if (navigator.vibrate) navigator.vibrate(80);
-
-  // teleport orb
-  const x = (Math.random() - 0.5).toFixed(2);
-  const y = (Math.random() * 0.5 + 0.1).toFixed(2);
-  orb.setAttribute("position", `${x} ${y} 0.3`);
-
-  orb.setAttribute("color", score % 2 === 0 ? "#ff00ff" : "#00ff99");
-
-  if (score === 2) {
-    dialogue.innerText = "You found my curiosity 🔍";
-    nameText.setAttribute("value", "CREATIVE THINKER");
-  }
-  else if (score === 4) {
-    dialogue.innerText = "Tech + Art = Me 🚀";
-    nameText.setAttribute("value", "AR | AI | DESIGN");
-  }
-  else if (score >= 6) {
-    dialogue.innerText = "You unlocked my digital soul 👁️✨";
-    nameText.setAttribute("value", "FUTURE BUILDER");
-  }
-});
-
-function resetGame() {
-  score = 0;
-  scoreText.innerText = "Score: 0";
-  dialogue.innerText = "Catch the glowing orb to know more about me 👀";
-  orb.setAttribute("color", "#00ffff");
-  nameText.setAttribute("value", "AYUSHI PADHY");
-}
 </script>
 
 </body>
