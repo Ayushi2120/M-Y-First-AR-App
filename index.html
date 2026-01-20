@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <title>AR Business Card – Ayushi Padhy</title>
+
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+
+  <!-- MindAR -->
+  <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      overflow: hidden;
+      font-family: Arial, sans-serif;
+    }
+  </style>
+</head>
+
+<body>
+
+<a-scene
+  mindar-image="imageTargetSrc: ./targets.mind;"
+  color-space="sRGB"
+  renderer="colorManagement: true, physicallyCorrectLights"
+  vr-mode-ui="enabled: false"
+  device-orientation-permission-ui="enabled: false"
+>
+
+  <!-- Camera -->
+  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+  <!-- Image Target -->
+  <a-entity mindar-image-target="targetIndex: 0">
+
+    <!-- Name -->
+    <a-text
+      value="AYUSHI PADHY"
+      color="#FFFFFF"
+      align="center"
+      width="2.8"
+      position="0 0.45 0"
+      animation="property: opacity; from: 0; to: 1; dur: 1200; easing: easeInOutQuad">
+    </a-text>
+
+    <!-- Role -->
+    <a-text
+      value="Engineering Student | AR & VR"
+      color="#FFD700"
+      align="center"
+      width="3.2"
+      position="0 0.28 0"
+      animation="property: opacity; from: 0; to: 1; dur: 1600; easing: easeInOutQuad">
+    </a-text>
+
+    <!-- Creative Sphere -->
+    <a-sphere
+      position="-0.45 0 0.1"
+      radius="0.1"
+      color="#FF69B4"
+      animation="property: position; to: -0.45 0.12 0.1; dir: alternate; dur: 1000; loop: true">
+    </a-sphere>
+
+    <!-- Technical Skills Box -->
+    <a-box
+      position="0 0 0.1"
+      depth="0.15"
+      height="0.15"
+      width="0.15"
+      color="#6A5ACD"
+      animation="property: rotation; to: 0 360 0; loop: true; dur: 3000">
+    </a-box>
+
+    <!-- Curiosity Cylinder -->
+    <a-cylinder
+      position="0.45 0 0.1"
+      radius="0.07"
+      height="0.15"
+      color="#00FA9A"
+      animation="property: scale; to: 1.3 1.3 1.3; dir: alternate; dur: 800; loop: true">
+    </a-cylinder>
+
+    <!-- Call to Action -->
+    <a-text
+      value="Scan • Explore • Connect"
+      color="#00FFFF"
+      align="center"
+      width="2.5"
+      position="0 -0.3 0"
+      animation="property: opacity; from: 0; to: 1; dur: 2000">
+    </a-text>
+
+  </a-entity>
+
+</a-scene>
+
+</body>
+</html>
