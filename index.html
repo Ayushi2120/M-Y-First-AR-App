@@ -1,135 +1,184 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
+  <!-- A-Frame -->
   <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+
+  <!-- MindAR -->
   <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
 
   <style>
     body { margin: 0; overflow: hidden; }
 
-    #ui {
+    #ui-overlay {
       position: fixed;
-      bottom: 15px;
+      bottom: 20px;
       left: 50%;
       transform: translateX(-50%);
-      width: 90%;
+      width: 85%;
       background: rgba(0,0,0,0.85);
       color: #00ffff;
-      padding: 12px;
-      border-radius: 12px;
+      padding: 15px;
+      border-radius: 15px;
+      border: 2px solid #00ffff;
       font-family: monospace;
       text-align: center;
       display: none;
-      z-index: 10;
+      z-index: 100;
+    }
+
+    .glitch {
+      text-shadow: 2px 2px #ff00ff;
+      animation: pulse 1.2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { opacity: 1; }
+      50% { opacity: 0.75; }
+      100% { opacity: 1; }
+    }
+
+    button {
+      margin: 6px;
+      padding: 8px 14px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
     }
   </style>
 </head>
 
 <body>
 
-<div id="ui">
-  <p id="info">Tap a circle to bring its avatar to life ✨</p>
+<!-- UI Overlay -->
+<div id="ui-overlay">
+  <p class="glitch" id="dialogue-text">
+    Are you sure you want to know about me?
+  </p>
+  <button onclick="changeMood('creative')" style="background:#00ffff;">Yes 😄</button>
+  <button onclick="changeMood('curious')" style="background:#ff00ff; color:white;">Tell me more 👁️</button>
 </div>
 
 <a-scene
   mindar-image="imageTargetSrc: ./targets.mind;"
-  vr-mode-ui="enabled:false"
-  device-orientation-permission-ui="enabled:false">
+  color-space="sRGB"
+  renderer="colorManagement: true, physicallyCorrectLights"
+  vr-mode-ui="enabled: false"
+  device-orientation-permission-ui="enabled: false"
+>
 
-  <a-assets>
-    <img id="img-creative" src="creative.png">
-    <img id="img-foodie" src="foodie.png">
-    <img id="img-observant" src="observant.png">
-    <img id="img-camera" src="camera.png">
-    <img id="img-curious" src="curious.png">
-  </a-assets>
+  <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-  <a-camera position="0 0 0" look-controls="enabled:false"></a-camera>
+  <!-- ================= FRONT SIDE AR ================= -->
+  <a-entity mindar-image-target="targetIndex: 1">
 
-  <!-- FRONT SIDE TARGET -->
-  <a-entity id="card" mindar-image-target="targetIndex: 1">
-
-    <!-- PRINTED CIRCLES (TAP AREA) -->
-
-    <a-circle class="tap-circle" data-avatar="creative"
-      position="-0.4 0.25 0.01" radius="0.12" color="#ffffff" opacity="0.01"></a-circle>
-
-    <a-circle class="tap-circle" data-avatar="foodie"
-      position="0 0.32 0.01" radius="0.12" color="#ffffff" opacity="0.01"></a-circle>
-
-    <a-circle class="tap-circle" data-avatar="observant"
-      position="0.4 0.25 0.01" radius="0.12" color="#ffffff" opacity="0.01"></a-circle>
-
-    <a-circle class="tap-circle" data-avatar="camera"
-      position="-0.22 -0.18 0.01" radius="0.12" color="#ffffff" opacity="0.01"></a-circle>
-
-    <a-circle class="tap-circle" data-avatar="curious"
-      position="0.22 -0.18 0.01" radius="0.12" color="#ffffff" opacity="0.01"></a-circle>
-
-    <!-- AVATAR IMAGE (HIDDEN INITIALLY) -->
-    <a-plane id="avatar"
-      position="0 0 0.25"
-      width="0.35" height="0.35"
-      material="transparent:true"
-      visible="false">
+    <!-- Glow -->
+    <a-plane
+      width="1.2"
+      height="0.7"
+      material="color:#00ffff; transparent:true; opacity:0.25"
+      animation="property: material.opacity; from:0.15; to:0.4; dir:alternate; dur:1200; loop:true">
     </a-plane>
 
+    <!-- Name -->
+    <a-text
+      value="AYUSHI PADHY"
+      align="center"
+      color="#ffffff"
+      position="0 0.25 0.1"
+      scale="0.6 0.6 0.6">
+    </a-text>
+
+    <!-- Role -->
+    <a-text
+      value="Engineering Student | AR & VR"
+      align="center"
+      color="#00ffff"
+      position="0 0.1 0.1"
+      scale="0.45 0.45 0.45">
+    </a-text>
+
+    <!-- Hint -->
+    <a-text
+      value="Flip the card 👀"
+      align="center"
+      color="#ff00ff"
+      position="0 -0.2 0.1"
+      scale="0.35 0.35 0.35"
+      animation="property: opacity; from:0.3; to:1; dir:alternate; dur:1000; loop:true">
+    </a-text>
+
   </a-entity>
+
+  <!-- ================= BACK SIDE AR ================= -->
+  <a-entity id="card-target" mindar-image-target="targetIndex: 0">
+
+    <!-- Glow -->
+    <a-plane
+      width="1.2"
+      height="0.7"
+      material="color:#00ffff; transparent:true; opacity:0.2"
+      animation="property: material.opacity; from:0.1; to:0.35; dir:alternate; dur:1200; loop:true">
+    </a-plane>
+
+    <!-- Avatar -->
+    <a-entity
+      id="avatar"
+      position="0 0.35 0.15"
+      scale="0.25 0.25 0.25"
+      animation="property: position; y:0.4; dir:alternate; dur:2000; loop:true">
+
+      <a-sphere radius="0.25" color="#ffffff"></a-sphere>
+      <a-sphere radius="0.05" color="black" position="-0.08 0.05 0.22"></a-sphere>
+      <a-sphere radius="0.05" color="black" position="0.08 0.05 0.22"></a-sphere>
+
+    </a-entity>
+
+    <!-- Mood Orb -->
+    <a-octahedron
+      id="mood-orb"
+      position="0.5 0.25 0.15"
+      radius="0.1"
+      color="#ff00ff"
+      animation="property: rotation; to:0 360 0; loop:true; dur:3500">
+    </a-octahedron>
+
+  </a-entity>
+
 </a-scene>
 
 <script>
-  const ui = document.getElementById("ui");
-  const info = document.getElementById("info");
-  const card = document.getElementById("card");
-  const avatar = document.getElementById("avatar");
-  const circles = document.querySelectorAll(".tap-circle");
+  const target = document.querySelector('#card-target');
+  const ui = document.querySelector('#ui-overlay');
+  const dialogue = document.querySelector('#dialogue-text');
+  const avatar = document.querySelector('#avatar');
+  const orb = document.querySelector('#mood-orb');
 
-  const messages = {
-    creative: "🎨 Creative: I turn ideas into visuals.",
-    foodie: "🍜 Foodie: Food fuels my imagination.",
-    observant: "👀 Observant: I notice what others miss.",
-    camera: "📸 Moment Capturer: I freeze memories.",
-    curious: "🧠 Curious: Exploring AR & VR realities."
-  };
-
-  card.addEventListener("targetFound", () => {
+  target.addEventListener("targetFound", () => {
     ui.style.display = "block";
   });
 
-  card.addEventListener("targetLost", () => {
+  target.addEventListener("targetLost", () => {
     ui.style.display = "none";
-    avatar.setAttribute("visible", false);
   });
 
-  circles.forEach(circle => {
-    circle.addEventListener("click", () => {
-
-      const type = circle.dataset.avatar;
-
-      avatar.setAttribute("material", `src: #img-${type}`);
-      avatar.setAttribute("position", `${circle.object3D.position.x} ${circle.object3D.position.y} 0.3`);
-      avatar.setAttribute("visible", true);
-
-      avatar.setAttribute("animation", `
-        property: position;
-        to: ${circle.object3D.position.x} ${circle.object3D.position.y + 0.15} 0.35;
-        dur: 500;
-        easing: easeOutElastic
-      `);
-
-      info.innerText = messages[type];
-    });
-  });
-
-  // SECOND INTERACTION: tap avatar
-  avatar.addEventListener("click", () => {
-    info.innerText = "✨ This avatar holds more stories…";
-    avatar.setAttribute("animation", "property: rotation; to: 0 360 0; dur: 800");
-  });
+  function changeMood(mode) {
+    if (mode === 'creative') {
+      dialogue.innerText =
+        "I mix creativity with technology and turn ideas into experiences 🎨✨";
+      avatar.setAttribute('scale', '0.28 0.28 0.28');
+      orb.setAttribute('color', '#00ff99');
+    } else {
+      dialogue.innerText =
+        "I observe details, ask questions, and explore reality through AR 👁️";
+      avatar.setAttribute('scale', '0.22 0.22 0.22');
+      orb.setAttribute('color', '#ff4444');
+    }
+  }
 </script>
 
 </body>
 </html>
-
